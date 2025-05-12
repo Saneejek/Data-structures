@@ -1,17 +1,18 @@
 #include <iostream>
+#include <algorithm>
 
 using namespace std;
 
 // Функция для расширенного алгоритма Евклида
-int gcdExtended(int a, int b, int *x, int *y) {
+long long gcdExtended(long long a, long long b, long long *x, long long *y) {
     if (a == 0) {
         *x = 0;
         *y = 1;
         return b;
     }
 
-    int x1, y1;
-    int gcd = gcdExtended(b % a, a, &x1, &y1);
+    long long x1, y1;
+    long long gcd = gcdExtended(b % a, a, &x1, &y1);
 
     *x = y1 - (b / a) * x1;
     *y = x1;
@@ -20,11 +21,18 @@ int gcdExtended(int a, int b, int *x, int *y) {
 }
 
 int main() {
-    int a, b, c;
+    long long a, b, c;
     cin >> a >> b >> c;
 
-    int x, y;
-    int gcd_ab = gcdExtended(a, b, &x, &y);
+    // Обрабатываем отрицательные a и b, запоминая знаки
+    long long sign_a = (a < 0) ? -1 : 1;
+    long long sign_b = (b < 0) ? -1 : 1;
+
+    a = abs(a);
+    b = abs(b);
+
+    long long x, y;
+    long long gcd_ab = gcdExtended(a, b, &x, &y);
 
     if (c % gcd_ab != 0) {
         cout << "Impossible" << endl;
@@ -35,28 +43,24 @@ int main() {
     x *= (c / gcd_ab);
     y *= (c / gcd_ab);
 
-    // Находим общее решение:
-    // x = x0 + (b/gcd) * t
-    // y = y0 - (a/gcd) * t
+    // Учитываем знаки a и b при поиске общего решения
+    long long a_div_gcd = a / gcd_ab;
+    long long b_div_gcd = b / gcd_ab;
 
     // Находим такое t, чтобы x было наименьшим неотрицательным
-    int b_div_gcd = b / gcd_ab;
-    int t = (x >= 0) ? (x / b_div_gcd) : ((x - b_div_gcd + 1) / b_div_gcd);
 
-    x -= b_div_gcd * t;
-    y += (a / gcd_ab) * t;
-
-    // Если x все еще отрицательное, увеличиваем t на 1
-    if (x < 0) {
+    while (x < 0) {
         x += b_div_gcd;
-        y -= (a / gcd_ab);
+        y -= a_div_gcd;
     }
-    
-    //Проверка, чтобы x был действительно минимальным неотрицательным
-    if (x >= b_div_gcd) {
-        x -= b_div_gcd;
-        y += (a / gcd_ab);
+    while (x >= b_div_gcd)
+    {
+      x -= b_div_gcd;
+      y += a_div_gcd;
     }
+
+
+    // Восстанавливаем знаки исходных a и b в решении
 
     cout << x << " " << y << endl;
 
